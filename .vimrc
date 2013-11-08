@@ -94,7 +94,7 @@ set backspace=eol,start,indent
 set whichwrap+=<,>,h,l
 
 " Don't auto add annotation
-set paste
+"set paste
 
 """"""""""""""""""""""""""""""""""""""""""
 " TagList configure
