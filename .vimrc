@@ -84,7 +84,7 @@ set scrolloff=5    "auto scroll when 5 line left
 if (has("gui_running"))
     set nowrap
     set guioptions+=b
-    set guifont=Monospace\ 9
+    set guifont=Monospace\ 8
 else
     set wrap
 endif 
@@ -116,3 +116,58 @@ set cscopetagorder=0
 "let g:winManagerWindowLayout='FileExplorer|TagList'
 "nmap wm :WMToggle<cr>
 
+""""""""""""""""""""""""""""""""""""""""""""""
+"Auto descripe
+""""""""""""""""""""""""""""""""""""""""""""""
+" 当新建 .h .c .hpp .cpp 等文件时自动调用SetTitle 函数
+autocmd BufNewFile *.[ch],*.hpp,*.cpp exec ":call AddTitle()" 
+" 加入注释 
+func SetComment()
+	call append(0, "/*================================================================") 
+	call append(1, "*   Copyright (C) ".strftime("%Y")." All rights reserved.")
+	call append(2, "*   ") 
+	call append(3, "*   File name:   ".expand("%:t")) 
+	call append(4, "*   Author:      SongChenglin")
+	call append(5, "*   E-mail:      xasongchenglin@foxmail.com")
+	call append(6, "*   Create time: ".strftime("%Y-%m-%d %H:%M"))
+	call append(7, "*   Last modify: ".strftime("%Y-%m-%d %H:%M"))
+	call append(8, "*   Description: ") 
+	call append(9, "*")
+	call append(10,"================================================================*/") 
+endfunc
+ 
+" 定义函数SetTitle，自动插入文件头
+func AddTitle()
+	call SetComment()
+	if expand("%:e") == 'h' 
+		call append(11, "#ifndef _".toupper(expand("%:t:r"))."_H") 
+		call append(12, "#define _".toupper(expand("%:t:r"))."_H")
+		call append(line("."), "#endif")
+	endif
+endfunc
+
+map <F4> :call TitleDet()<cr>'s
+"更新最近修改时间和文件名
+function UpdateTitle()
+    normal m'
+    execute '/#*   File name:/s@:.*$@\=":   ".expand("%:t")@'
+    normal m'
+    execute '/#*   Last modify:/s@:.*$@\=strftime(": %Y-%m-%d %H:%M")@'
+    execute "noh"
+    normal 'k
+    echohl WarningMsg | echo "Successful in updating the copy right." | echohl None
+endfunction
+
+function TitleDet()
+    let n=1
+    "默认为添加
+    while n < 10
+        let line = getline(n)
+        if line =~ '^\s*\S*   Last modify:\S*.*$'
+            call UpdateTitle()
+            return
+        endif
+        let n = n + 1
+    endwhile
+    call AddTitle()
+endfunction
